@@ -9,6 +9,14 @@ pipeline {
     stage('Checkout') {
       steps { checkout scm }
     }
+    stage('Azure Login & ACR Build') {
+      agent {
+        docker {
+          image 'mcr.microsoft.com/azure-cli:latest'
+          args  '-u root'                   // run as root so we can login
+        }
+      }
+    }
     stage('Login to Azure') {
       steps {
         withCredentials([usernamePassword(
@@ -23,7 +31,13 @@ pipeline {
             az login --service-principal \
               --username $AZ_APP_ID \
               --password $AZ_PASSWORD \
-              --tenant $AZ_TENANT                             # Authenticate to Azure :contentReference[oaicite:6]{index=6}
+              --tenant $AZ_TENANT
+
+            az acr build \
+              --registry $ACR_NAME \
+              --image $IMAGE_NAME:$BUILD_TAG \
+              --image $IMAGE_NAME:latest \
+              .
           '''
         }
       }
