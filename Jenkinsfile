@@ -14,42 +14,36 @@ pipeline {
         sh 'go test ./...'
       }
     }
-    stage('Build & Push Docker Image') {
-      agent {
-        docker {
-          image 'docker:24.0.5-cli'          // Use official Docker CLI image
-          args  '-v /var/run/docker.sock:/var/run/docker.sock'  
-                                            // Mount Docker socket for DinD 
-        }
-      }
+    stage('Login to Azure') {
       steps {
-        script {
-          docker.withRegistry("https://${ACR}", 'acr-credentials') {  
-            // Log in to Azure Container Registry
-
-            // Build with cache and version arg
-            def customImage = docker.build(
-              "${ACR}/${IMAGE_NAME}:${BUILD_TAG}",
-              "--build-arg VERSION=${BUILD_TAG} --cache-from ${ACR}/${IMAGE_NAME}:latest ."
-            )                                   // Tag and build from context 
-
-            // Push both versioned and latest tags
-            customImage.push()                  // Push the BUILD_TAG 
-            customImage.push('latest')          // Also update the `latest` tag 
+        withCredentials([usernamePassword(
+          credentialsId: 'acr-credentials',                         // Service Principal credentials stored in Jenkins :contentReference[oaicite:4]{index=4}
+          usernameVariable: 'AZ_APP_ID',
+          passwordVariable: 'AZ_PASSWORD'
+        ), string(
+          credentialsId: 'azure-tenant',                     // Tenant ID stored as a secret :contentReference[oaicite:5]{index=5}
+          variable: 'AZ_TENANT'
+        )]) {
+          sh '''
+            az login --service-principal \
+              --username $AZ_APP_ID \
+              --password $AZ_PASSWORD \
+              --tenant $AZ_TENANT                             # Authenticate to Azure :contentReference[oaicite:6]{index=6}
+          '''
         }
       }
     }
-    stage('Deploy via Helm') {
+    stage('ACR Build & Push') {
       steps {
-        withKubeConfig(credentialsId: 'aks-kubeconfig') {
-          sh """
-            helm upgrade --install ${IMAGE_NAME} helm-chart/ \
-              --namespace default \
-              --set image.repository=${ACR}/${IMAGE_NAME} \
-              --set image.tag=${BUILD_TAG}
-          """
-        }
+        sh '''
+          az acr build \
+            --registry $ACR_NAME \
+            --image $IMAGE_NAME:$BUILD_TAG \
+            --image $IMAGE_NAME:latest \
+            .                                              # Build & push via ACR Tasks :contentReference[oaicite:7]{index=7}
+        '''
       }
     }
   }
 }
+
