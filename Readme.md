@@ -61,6 +61,8 @@ transaction-app/
 ```
 
 This layout helps me quickly locate code, tests, Docker configurations, and Kubernetes manifests. Separating concerns reduces confusion and makes collaboration easier if you work with a team.
+![Architecture](https://github.com/user-attachments/assets/5c4ce407-6d8f-43cb-823e-3e53a4976681)
+![Workflow](https://github.com/user-attachments/assets/4ba7f95d-af3e-4a75-856c-fcb4bc4e809b)
 
 ---
 
