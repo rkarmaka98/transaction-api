@@ -16,8 +16,6 @@ pipeline {
           args  '-u root'                   // run as root so we can login
         }
       }
-    }
-    stage('Login to Azure') {
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'acr-credentials',                         // Service Principal credentials stored in Jenkins :contentReference[oaicite:4]{index=4}
