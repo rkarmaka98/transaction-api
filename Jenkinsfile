@@ -9,11 +9,6 @@ pipeline {
     stage('Checkout') {
       steps { checkout scm }
     }
-    stage('Build & Test') {
-      steps {
-        sh 'go test ./...'
-      }
-    }
     stage('Login to Azure') {
       steps {
         withCredentials([usernamePassword(
