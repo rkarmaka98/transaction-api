@@ -18,11 +18,11 @@ pipeline {
       }
       steps {
         withCredentials([usernamePassword(
-          credentialsId: 'acr-credentials',                         // Service Principal credentials stored in Jenkins :contentReference[oaicite:4]{index=4}
+          credentialsId: 'acr-credentials',                         // Service Principal credentials stored in Jenkins 
           usernameVariable: 'AZ_APP_ID',
           passwordVariable: 'AZ_PASSWORD'
         ), string(
-          credentialsId: 'azure-tenant',                     // Tenant ID stored as a secret :contentReference[oaicite:5]{index=5}
+          credentialsId: 'azure-tenant',                     // Tenant ID stored as a secret
           variable: 'AZ_TENANT'
         )]) {
           sh '''
@@ -47,7 +47,7 @@ pipeline {
             --registry $ACR_NAME \
             --image $IMAGE_NAME:$BUILD_TAG \
             --image $IMAGE_NAME:latest \
-            .                                              # Build & push via ACR Tasks :contentReference[oaicite:7]{index=7}
+            .                                              # Build & push via ACR Tasks
         '''
       }
     }
